@@ -38,7 +38,31 @@ void setup() {
 }
 
 void loop() {
+  Serial.println(sizeof(MOMENTARY_PINS));
+  int momentaryOnButtonStates[sizeof(MOMENTARY_PINS)];
+  readMomentaryOnButtons(momentaryOnButtonStates);
+  
+  for (int i=0; i<sizeof(momentaryOnButtonStates); i++) {
+     if (momentaryOnButtonStates[i] == 1) {
+       Serial.print(i);
+       Serial.println(" was pressed!"); 
+     }
+  }
+}
+
+void render() {
+  digitalWrite(PIN_LATCH, LOW);
+  for (int i = 2; i >= 0; i--) {
+    int shiftValue = SEVEN_SEG_BINARY[ledValues[i]];
+    shiftOut(PIN_SERIAL, PIN_CLOCK, MSBFIRST, shiftValue);
+  }
+  digitalWrite(PIN_LATCH, HIGH);
+}
+
+void readMomentaryOnButtons(int buttonStates[]) {
   for (int i=0; i<sizeof(MOMENTARY_PINS); i++) {
+    buttonStates[i] = 0;
+    
     int reading = digitalRead(MOMENTARY_PINS[i]);
     
     if (reading != LAST_BUTTON_STATES[i]) {
@@ -50,20 +74,11 @@ void loop() {
         BUTTON_STATES[i] = reading;
   
         if (BUTTON_STATES[i] == LOW) {
-          Serial.println(i);
+          buttonStates[i] = 1;
         }
       }
     }
     
     LAST_BUTTON_STATES[i] = reading;
   }
-}
-
-void render() {
-  digitalWrite(PIN_LATCH, LOW);
-  for (int i = 2; i >= 0; i--) {
-    int shiftValue = SEVEN_SEG_BINARY[ledValues[i]];
-    shiftOut(PIN_SERIAL, PIN_CLOCK, MSBFIRST, shiftValue);
-  }
-  digitalWrite(PIN_LATCH, HIGH);
 }
