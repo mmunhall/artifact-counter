@@ -13,8 +13,9 @@ long LAST_MOMENTARY_BUTTON_DEBOUNCE_TIMES[sizeof(MOMENTARY_PINS)];
 // Integer values for the seven-segment LEDS for each digit (0-9). The ordinal position represents the binary value for that digit.
 const int SEVEN_SEG_BINARY[] = {63, 6, 91, 79, 102, 109, 125, 7, 127, 111};
 
-// The initial value of each seven-segment LED.
-int ledValues[] = {0, 0, 0};
+// The initial value of each seven-segment LED for each player.
+int ledValues[4][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+int currentPlayer = 0;
 
 // We can be in one of two modes: COUNTER or CALCULATOR.
 // TODO: Use an enum for MODES
@@ -46,45 +47,45 @@ void loop() {
      if (momentaryOnButtonStates[i] == 1) {
        switch(i) {
          case 0:
-           if (ledValues[0] == 0) {
-             ledValues[0] = 9;
+           if (ledValues[currentPlayer][0] == 0) {
+             ledValues[currentPlayer][0] = 9;
            } else {
-             ledValues[0]--;
+             ledValues[currentPlayer][0]--;
            }
            break;
          case 1:
-           if (ledValues[0] == 9) {
-             ledValues[0] = 0;
+           if (ledValues[currentPlayer][0] == 9) {
+             ledValues[currentPlayer][0] = 0;
            } else {
-             ledValues[0]++;
+             ledValues[currentPlayer][0]++;
            }
            break;
          case 2:
-           if (ledValues[1] == 0) {
-             ledValues[1] = 9;
+           if (ledValues[currentPlayer][1] == 0) {
+             ledValues[currentPlayer][1] = 9;
            } else {
-             ledValues[1]--;
+             ledValues[currentPlayer][1]--;
            }
            break;
          case 3:
-           if (ledValues[1] == 9) {
-             ledValues[1] = 0;
+           if (ledValues[currentPlayer][1] == 9) {
+             ledValues[currentPlayer][1] = 0;
            } else {
-             ledValues[1]++;
+             ledValues[currentPlayer][1]++;
            }
            break;
          case 4:
-           if (ledValues[2] == 0) {
-             ledValues[2] = 9;
+           if (ledValues[currentPlayer][2] == 0) {
+             ledValues[currentPlayer][2] = 9;
            } else {
-             ledValues[2]--;
+             ledValues[currentPlayer][2]--;
            }
            break;
          case 5:
-           if (ledValues[2] == 9) {
-             ledValues[2] = 0;
+           if (ledValues[currentPlayer][2] == 9) {
+             ledValues[currentPlayer][2] = 0;
            } else {
-             ledValues[2]++;
+             ledValues[currentPlayer][2]++;
            }
            break;
        }
@@ -96,7 +97,7 @@ void loop() {
 void render() {
   digitalWrite(PIN_LATCH, LOW);
   for (int i = 2; i >= 0; i--) {
-    int shiftValue = SEVEN_SEG_BINARY[ledValues[i]];
+    int shiftValue = SEVEN_SEG_BINARY[ledValues[currentPlayer][i]];
     shiftOut(PIN_SERIAL, PIN_CLOCK, MSBFIRST, shiftValue);
   }
   digitalWrite(PIN_LATCH, HIGH);
