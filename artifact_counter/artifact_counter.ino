@@ -5,9 +5,10 @@ const int PIN_CLOCK = 10;
 const long BOUNCE_DELAY = 50;
 
 // For debouncing the momentary-on buttons.
-int BUTTON_STATES[sizeof(MOMENTARY_PINS)];
-int LAST_BUTTON_STATES[sizeof(MOMENTARY_PINS)];
-long LAST_BUTTON_DEBOUNCE_TIMES[sizeof(MOMENTARY_PINS)];
+const int NUM_MOMENTARY_BUTTONS = sizeof(MOMENTARY_PINS)/sizeof(int);
+int MOMENTARY_BUTTON_STATES[sizeof(MOMENTARY_PINS)];
+int LAST_MOMENTARY_BUTTON_STATES[sizeof(MOMENTARY_PINS)];
+long LAST_MOMENTARY_BUTTON_DEBOUNCE_TIMES[sizeof(MOMENTARY_PINS)];
 
 // Integer values for the seven-segment LEDS for each digit (0-9). The ordinal position represents the binary value for that digit.
 const int SEVEN_SEG_BINARY[] = {63, 6, 91, 79, 102, 109, 125, 7, 127, 111};
@@ -24,11 +25,11 @@ char* currentMode = MODES[0];
 
 void setup() {
   Serial.begin(9600);
-  for (int i=0; i<sizeof(MOMENTARY_PINS); i++) {
+  for (int i=0; i<NUM_MOMENTARY_BUTTONS; i++) {
     pinMode(MOMENTARY_PINS[i], INPUT_PULLUP);
-    BUTTON_STATES[i] = HIGH;
-    LAST_BUTTON_STATES[i] = HIGH;
-    LAST_BUTTON_DEBOUNCE_TIMES[i] = 0;
+    MOMENTARY_BUTTON_STATES[i] = HIGH;
+    LAST_MOMENTARY_BUTTON_STATES[i] = HIGH;
+    LAST_MOMENTARY_BUTTON_DEBOUNCE_TIMES[i] = 0;
   }
   pinMode(PIN_SERIAL, OUTPUT);
   pinMode(PIN_LATCH, OUTPUT);
@@ -38,14 +39,56 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(sizeof(MOMENTARY_PINS));
-  int momentaryOnButtonStates[sizeof(MOMENTARY_PINS)];
+  int momentaryOnButtonStates[NUM_MOMENTARY_BUTTONS];
   readMomentaryOnButtons(momentaryOnButtonStates);
   
-  for (int i=0; i<sizeof(momentaryOnButtonStates); i++) {
+  for (int i=0; i<NUM_MOMENTARY_BUTTONS; i++) {
      if (momentaryOnButtonStates[i] == 1) {
-       Serial.print(i);
-       Serial.println(" was pressed!"); 
+       switch(i) {
+         case 0:
+           if (ledValues[0] == 0) {
+             ledValues[0] = 9;
+           } else {
+             ledValues[0]--;
+           }
+           break;
+         case 1:
+           if (ledValues[0] == 9) {
+             ledValues[0] = 0;
+           } else {
+             ledValues[0]++;
+           }
+           break;
+         case 2:
+           if (ledValues[1] == 0) {
+             ledValues[1] = 9;
+           } else {
+             ledValues[1]--;
+           }
+           break;
+         case 3:
+           if (ledValues[1] == 9) {
+             ledValues[1] = 0;
+           } else {
+             ledValues[1]++;
+           }
+           break;
+         case 4:
+           if (ledValues[2] == 0) {
+             ledValues[2] = 9;
+           } else {
+             ledValues[2]--;
+           }
+           break;
+         case 5:
+           if (ledValues[2] == 9) {
+             ledValues[2] = 0;
+           } else {
+             ledValues[2]++;
+           }
+           break;
+       }
+       render();
      }
   }
 }
@@ -60,25 +103,25 @@ void render() {
 }
 
 void readMomentaryOnButtons(int buttonStates[]) {
-  for (int i=0; i<sizeof(MOMENTARY_PINS); i++) {
+  for (int i=0; i<NUM_MOMENTARY_BUTTONS; i++) {
     buttonStates[i] = 0;
     
     int reading = digitalRead(MOMENTARY_PINS[i]);
     
-    if (reading != LAST_BUTTON_STATES[i]) {
-      LAST_BUTTON_DEBOUNCE_TIMES[i] = millis();
+    if (reading != LAST_MOMENTARY_BUTTON_STATES[i]) {
+      LAST_MOMENTARY_BUTTON_DEBOUNCE_TIMES[i] = millis();
     } 
   
-    if ((millis() - LAST_BUTTON_DEBOUNCE_TIMES[i]) > BOUNCE_DELAY) {
-      if (reading != BUTTON_STATES[i]) {
-        BUTTON_STATES[i] = reading;
+    if ((millis() - LAST_MOMENTARY_BUTTON_DEBOUNCE_TIMES[i]) > BOUNCE_DELAY) {
+      if (reading != MOMENTARY_BUTTON_STATES[i]) {
+        MOMENTARY_BUTTON_STATES[i] = reading;
   
-        if (BUTTON_STATES[i] == LOW) {
+        if (MOMENTARY_BUTTON_STATES[i] == LOW) {
           buttonStates[i] = 1;
         }
       }
     }
     
-    LAST_BUTTON_STATES[i] = reading;
+    LAST_MOMENTARY_BUTTON_STATES[i] = reading;
   }
 }
