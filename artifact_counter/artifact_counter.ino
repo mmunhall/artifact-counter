@@ -1,11 +1,14 @@
-const int MOMENTARY_PINS[] = {2, 3, 4, 5, 6, 7, 11, 12};
-const int PIN_SERIAL = 8;
-const int PIN_LATCH = 9;
-const int PIN_CLOCK = 10;
+const int MOMENTARY_PINS[] = {2, 3, 4, 5, 6, 7, 8, 9};
+const int SET_INDICATOR_PINS[] = {10, 11, 12, 13};
+const int PIN_SERIAL = A0;
+const int PIN_LATCH = A1;
+const int PIN_CLOCK = A2;
 const long BOUNCE_DELAY = 50;
 
-// For debouncing the momentary-on buttons.
+const int NUM_SET_INDICATORS = sizeof(SET_INDICATOR_PINS)/sizeof(int);
 const int NUM_MOMENTARY_BUTTONS = sizeof(MOMENTARY_PINS)/sizeof(int);
+
+// For debouncing the momentary-on buttons
 int MOMENTARY_BUTTON_STATES[sizeof(MOMENTARY_PINS)];
 int LAST_MOMENTARY_BUTTON_STATES[sizeof(MOMENTARY_PINS)];
 long LAST_MOMENTARY_BUTTON_DEBOUNCE_TIMES[sizeof(MOMENTARY_PINS)];
@@ -31,6 +34,9 @@ void setup() {
     MOMENTARY_BUTTON_STATES[i] = HIGH;
     LAST_MOMENTARY_BUTTON_STATES[i] = HIGH;
     LAST_MOMENTARY_BUTTON_DEBOUNCE_TIMES[i] = 0;
+  }
+  for (int i=0; i<NUM_SET_INDICATORS; i++) {
+    pinMode(SET_INDICATOR_PINS[i], OUTPUT);
   }
   pinMode(PIN_SERIAL, OUTPUT);
   pinMode(PIN_LATCH, OUTPUT);
@@ -115,6 +121,14 @@ void render() {
     shiftOut(PIN_SERIAL, PIN_CLOCK, MSBFIRST, shiftValue);
   }
   digitalWrite(PIN_LATCH, HIGH);
+  
+  for (int i=0; i<NUM_SET_INDICATORS; i++) {
+    if (currentSet == i) {
+      digitalWrite(SET_INDICATOR_PINS[i], HIGH);
+    } else {
+      digitalWrite(SET_INDICATOR_PINS[i], LOW);
+    }
+  }
 }
 
 void readMomentaryOnButtons(int buttonStates[]) {
