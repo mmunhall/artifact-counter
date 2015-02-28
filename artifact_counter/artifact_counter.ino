@@ -52,9 +52,6 @@ void loop() {
   
   currentMode = readModeButtonStates();
   
-  Serial.print("The current mode is: ");
-  Serial.println(currentMode);
-  
   for (int i=0; i<NUM_MOMENTARY_BUTTONS; i++) {
      if (momentaryOnButtonStates[i] == 1) {
        switch(i) {
@@ -164,11 +161,6 @@ void readMomentaryOnButtons(int buttonStates[]) {
 int readModeButtonStates() {
   int calculatorModeButtonState = digitalRead(PIN_MODE_CALCULATOR);
   int counterModeButtonState = digitalRead(PIN_MODE_COUNTER);
-  
-//  Serial.print("calculator: ");
-//  Serial.println(calculatorModeButtonState);
-//  Serial.print("counter: ");
-//  Serial.println(counterModeButtonState);
   
   if (counterModeButtonState == LOW) {
     return 0;
