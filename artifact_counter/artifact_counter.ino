@@ -3,6 +3,8 @@ const int SET_INDICATOR_PINS[] = {10, 11, 12, 13};
 const int PIN_SERIAL = A0;
 const int PIN_LATCH = A1;
 const int PIN_CLOCK = A2;
+const int PIN_MODE_CALCULATOR = A3;
+const int PIN_MODE_COUNTER = A4;
 const long BOUNCE_DELAY = 50;
 
 const int NUM_SET_INDICATORS = sizeof(SET_INDICATOR_PINS)/sizeof(int);
@@ -20,12 +22,9 @@ const int SEVEN_SEG_BINARY[] = {63, 6, 91, 79, 102, 109, 125, 7, 127, 111};
 int ledValues[4][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
 int currentSet = 0;
 
-// We can be in one of two modes: COUNTER or CALCULATOR.
-// TODO: Use an enum for MODES
-char* MODES[] = {"COUNTER", "CALCULATOR"};
-
+// Modes: 0=COUNTER, 1=CALCULATOR
 // The default mode is COUNTER
-char* currentMode = MODES[0];
+int currentMode = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -38,6 +37,8 @@ void setup() {
   for (int i=0; i<NUM_SET_INDICATORS; i++) {
     pinMode(SET_INDICATOR_PINS[i], OUTPUT);
   }
+  pinMode(PIN_MODE_CALCULATOR, INPUT_PULLUP);
+  pinMode(PIN_MODE_COUNTER, INPUT_PULLUP);
   pinMode(PIN_SERIAL, OUTPUT);
   pinMode(PIN_LATCH, OUTPUT);
   pinMode(PIN_CLOCK, OUTPUT);
@@ -48,6 +49,11 @@ void setup() {
 void loop() {
   int momentaryOnButtonStates[NUM_MOMENTARY_BUTTONS];
   readMomentaryOnButtons(momentaryOnButtonStates);
+  
+  currentMode = readModeButtonStates();
+  
+  Serial.print("The current mode is: ");
+  Serial.println(currentMode);
   
   for (int i=0; i<NUM_MOMENTARY_BUTTONS; i++) {
      if (momentaryOnButtonStates[i] == 1) {
@@ -152,5 +158,23 @@ void readMomentaryOnButtons(int buttonStates[]) {
     }
     
     LAST_MOMENTARY_BUTTON_STATES[i] = reading;
+  }
+}
+
+int readModeButtonStates() {
+  int calculatorModeButtonState = digitalRead(PIN_MODE_CALCULATOR);
+  int counterModeButtonState = digitalRead(PIN_MODE_COUNTER);
+  
+//  Serial.print("calculator: ");
+//  Serial.println(calculatorModeButtonState);
+//  Serial.print("counter: ");
+//  Serial.println(counterModeButtonState);
+  
+  if (counterModeButtonState == LOW) {
+    return 0;
+  }
+  
+  if (calculatorModeButtonState == LOW) {
+     return 1; 
   }
 }
