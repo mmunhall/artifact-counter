@@ -1,10 +1,10 @@
-const int MOMENTARY_PINS[] = {2, 3, 4, 5, 6, 7, 8, 9};
-const int SET_INDICATOR_PINS[] = {10, 11, 12, 13};
-const int PIN_SERIAL = A0;
-const int PIN_LATCH = A1;
-const int PIN_CLOCK = A2;
-const int PIN_MODE_CALCULATOR = A3;
-const int PIN_MODE_COUNTER = A4;
+const int MOMENTARY_PINS[] = {2, 3, 4, 5, 6, 7, 8, 9, 10};
+const int SET_INDICATOR_PINS[] = {A0, A1, A2, A3};
+const int PIN_SERIAL = 11;
+const int PIN_LATCH = 12;
+const int PIN_CLOCK = 13;
+const int PIN_MODE_CALCULATOR = A4;
+const int PIN_MODE_COUNTER = A5;
 const long BOUNCE_DELAY = 50;
 
 const int NUM_SET_INDICATORS = sizeof(SET_INDICATOR_PINS)/sizeof(int);
@@ -71,6 +71,10 @@ void loop() {
         } else {
           currentSet++;
         }
+      } else if (i == 8) {
+        ledValues[currentSet][0] = 0;
+        ledValues[currentSet][1] = 0;
+        ledValues[currentSet][2] = 0;
       }
       render();
     }
