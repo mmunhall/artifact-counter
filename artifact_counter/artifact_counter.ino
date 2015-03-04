@@ -27,7 +27,6 @@ int currentSet = 0;
 int currentMode = 0;
 
 void setup() {
-  Serial.begin(9600);
   for (int i=0; i<NUM_MOMENTARY_BUTTONS; i++) {
     pinMode(MOMENTARY_PINS[i], INPUT_PULLUP);
     MOMENTARY_BUTTON_STATES[i] = HIGH;
@@ -53,68 +52,117 @@ void loop() {
   currentMode = readModeButtonStates();
   
   for (int i=0; i<NUM_MOMENTARY_BUTTONS; i++) {
-     if (momentaryOnButtonStates[i] == 1) {
-       switch(i) {
-         case 0:
-           if (ledValues[currentSet][0] == 0) {
-             ledValues[currentSet][0] = 9;
-           } else {
-             ledValues[currentSet][0]--;
-           }
-           break;
-         case 1:
-           if (ledValues[currentSet][0] == 9) {
-             ledValues[currentSet][0] = 0;
-           } else {
-             ledValues[currentSet][0]++;
-           }
-           break;
-         case 2:
-           if (ledValues[currentSet][1] == 0) {
-             ledValues[currentSet][1] = 9;
-           } else {
-             ledValues[currentSet][1]--;
-           }
-           break;
-         case 3:
-           if (ledValues[currentSet][1] == 9) {
-             ledValues[currentSet][1] = 0;
-           } else {
-             ledValues[currentSet][1]++;
-           }
-           break;
-         case 4:
-           if (ledValues[currentSet][2] == 0) {
-             ledValues[currentSet][2] = 9;
-           } else {
-             ledValues[currentSet][2]--;
-           }
-           break;
-         case 5:
-           if (ledValues[currentSet][2] == 9) {
-             ledValues[currentSet][2] = 0;
-           } else {
-             ledValues[currentSet][2]++;
-           }
-           break;
-         case 6:
-           if (currentSet == 0) {
-             currentSet = 3;
-           } else {
-             currentSet--;
-           }
-           break;
-         case 7:
-           if (currentSet == 3) {
-             currentSet = 0;
-           } else {
-             currentSet++;
-           }
-           break;
-       }
-       render();
-     }
+    if (momentaryOnButtonStates[i] == 1) {
+      if (i <= 5) { 
+        if (currentMode == 0) {
+          handleButtonPressForCounterMode(i);
+        } else {
+          handleButtonPressForCalculatorMode(i);
+        }
+      } else if (i == 6) {
+        if (currentSet == 0) {
+          currentSet = 3;
+        } else {
+          currentSet--;
+        }
+      } else if (i == 7) {
+        if (currentSet == 3) {
+          currentSet = 0;
+        } else {
+          currentSet++;
+        }
+      }
+      render();
+    }
   }
+}
+
+void handleButtonPressForCounterMode(int button) {
+  switch(button) {
+     case 0:
+       if (ledValues[currentSet][0] == 0) {
+         ledValues[currentSet][0] = 9;
+       } else {
+         ledValues[currentSet][0]--;
+       }
+       break;
+     case 1:
+       if (ledValues[currentSet][0] == 9) {
+         ledValues[currentSet][0] = 0;
+       } else {
+         ledValues[currentSet][0]++;
+       }
+       break;
+     case 2:
+       if (ledValues[currentSet][1] == 0) {
+         ledValues[currentSet][1] = 9;
+       } else {
+         ledValues[currentSet][1]--;
+       }
+       break;
+     case 3:
+       if (ledValues[currentSet][1] == 9) {
+         ledValues[currentSet][1] = 0;
+       } else {
+         ledValues[currentSet][1]++;
+       }
+       break;
+     case 4:
+       if (ledValues[currentSet][2] == 0) {
+         ledValues[currentSet][2] = 9;
+       } else {
+         ledValues[currentSet][2]--;
+       }
+       break;
+     case 5:
+       if (ledValues[currentSet][2] == 9) {
+         ledValues[currentSet][2] = 0;
+       } else {
+         ledValues[currentSet][2]++;
+       }
+       break;
+   }
+}
+
+void handleButtonPressForCalculatorMode(int button) {
+  int ledValuesAsInt = (ledValues[currentSet][0] * 100) + (ledValues[currentSet][1] * 10) + ledValues[currentSet][2];
+  switch(button) {
+    case 0:
+      if (ledValuesAsInt >= 100) {
+        ledValuesAsInt = ledValuesAsInt - 100;
+      }
+      break;
+    case 1:
+      if (ledValuesAsInt < 900) {
+         ledValuesAsInt = ledValuesAsInt + 100; 
+      }
+      break;
+    case 2:
+      if (ledValuesAsInt >= 10) {
+        ledValuesAsInt = ledValuesAsInt - 10;
+      }
+      break;
+    case 3:
+      if (ledValuesAsInt < 990) {
+        ledValuesAsInt = ledValuesAsInt + 10;
+      }
+      break;
+    case 4:
+      if (ledValuesAsInt >= 1) {
+        ledValuesAsInt--;
+      } 
+      break;
+    case 5:
+      if (ledValuesAsInt < 999) {
+        ledValuesAsInt++;
+      }
+      break;
+   }
+   
+   for(int i=2; i>=0; i--) {
+     ledValues[currentSet][i] = ledValuesAsInt % 10;
+     ledValuesAsInt = ledValuesAsInt / 10; 
+   }
 }
 
 void render() {
@@ -167,6 +215,6 @@ int readModeButtonStates() {
   }
   
   if (calculatorModeButtonState == LOW) {
-     return 1; 
+    return 1; 
   }
 }
